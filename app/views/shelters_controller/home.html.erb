@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>避難所ナビ</title>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="hazard1" class="button">地震</div>
+    <div id="hazard2" class="button">津波</div>
+    <div id="hazard3" class="button">風水害</div>
+    <div id="hazard4" class="button">噴火</div>
+
+    <script src="https://maps.googleapis.com/maps/api/js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script>
+    var map = null;
+    var icon = {
+      url: "<%= asset_path('position.png') %>",
+      scaledSize: new google.maps.Size(16, 16)
+    };
+    $(function() {
+      function initLocation() {
+        function successCallback(pos) {
+          if (map === null) {
+            initMap(pos);
+          }
+          else {
+            updateMap(pos);
+          }
+        }
+        function errorCallback(error) {
+          var msgs = [ "UNKNOWN", "位置情報の利用が許可されていません", "デバイスの位置が判定できません", "タイムアウトしました" ];
+          alert(msgs[error.code]);
+        }
+        if (navigator.geolocation) {
+          var options = {
+            enableHighAccuracy: true,    // 高精度を要求する
+            timeout: 60000,              // 最大待ち時間（ミリ秒）
+            maximumAge: 6000             // キャッシュ有効期間（ミリ秒）
+          };
+          navigator.geolocation.watchPosition(successCallback, errorCallback, options);
+        }
+        else {
+          alert('位置情報が利用できません。\nPCブラウザの場合はFirefoxをご利用下さい。');
+        }
+      }
+
+      function initMap(pos) {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: pos.coords.latitude, lng: pos.coords.longitude},
+          scrollwheel: false,
+          zoom: 18
+        });
+        var currentPosition = new google.maps.Marker({
+          position: {lat: pos.coords.latitude, lng: pos.coords.longitude},
+          map: map,
+          icon: icon
+        });
+      }
+
+      function updateMap(pos) {
+        map.setCenter({lat: pos.coords.latitude, lng: pos.coords.longitude});
+        var currentPosition = new google.maps.Marker({
+          position: {lat: pos.coords.latitude, lng: pos.coords.longitude},
+          map: map,
+          icon: icon
+        });
+      }
+
+      $(".button").bind('click', function(event) {
+                    $(".button").unbind('click').css('display', 'none');
+                  });
+      initLocation();
+    });
+    </script>
+  </body>
+</html>
