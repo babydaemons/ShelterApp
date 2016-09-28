@@ -8,6 +8,8 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script>
 var map = null;
+var json = [];
+var marker = [];
 var icon = {
   url: "<%= asset_path('position.png') %>",
   scaledSize: new google.maps.Size(16, 16)
@@ -43,13 +45,14 @@ $(function() {
     map = new google.maps.Map(document.getElementById('map'), {
       center: {lat: pos.coords.latitude, lng: pos.coords.longitude},
       scrollwheel: false,
-      zoom: 18
+      zoom: 17
     });
     var currentPosition = new google.maps.Marker({
       position: {lat: pos.coords.latitude, lng: pos.coords.longitude},
       map: map,
       icon: icon
     });
+    $(".button").bind('click', hazardSelected);
   }
 
   function updateMap(pos) {
@@ -61,9 +64,37 @@ $(function() {
     });
   }
 
-  $(".button").bind('click', function(event) {
-                $(".button").unbind('click').css('display', 'none');
-              });
   initLocation();
 });
+
+function hazardSelected(event) {
+  $(".button").unbind('click').css('display', 'none');
+  var type = event.target.id.replace('hazard', '');
+  var position = map.getCenter();
+  var lat = position.lat();
+  var lng = position.lng();
+  $.getJSON("<%= shelters_search_url %>", { lat: lat, lng: lng, type: type }, drawShelters);
+}
+
+function shelterSelected(i) {
+  return function() {
+    var info = new google.maps.InfoWindow({
+      content: json[i].name + '<br/>' + json[i].address,
+      position: marker[i].getPosition()
+    });
+    info.setMap(map, marker[i]);
+  };
+}
+
+function drawShelters(rsp) {
+  json = rsp;
+  var length = json.length;
+  for (var i = 0; i < length; ++i) {
+    marker[i] = new google.maps.Marker({
+      map: map,
+      position: new google.maps.LatLng(json[i].lat, json[i].lng)
+    });
+    google.maps.event.addListener(marker[i], 'click', shelterSelected(i));
+  }
+}
 </script>
