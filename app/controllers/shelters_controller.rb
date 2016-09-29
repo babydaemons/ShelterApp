@@ -14,9 +14,23 @@ class SheltersController < ApplicationController
     lng1 = lng - 5 * deg_per_km
     lng2 = lng + 5 * deg_per_km
     sql = ActiveRecord::Base.send(:sanitize_sql_array,
-      ["SELECT * FROM shelters WHERE (lat BETWEEN :lat1 AND :lat2) AND (lng BETWEEN :lng1 AND :lng2)",
+      ["SELECT * FROM shelters WHERE (lat BETWEEN :lat1 AND :lat2) AND (lng BETWEEN :lng1 AND :lng2) AND (#{hazard_type} > 0)",
         lat1: lat1, lat2: lat2, lng1: lng1, lng2: lng2])
     shelters = ActiveRecord::Base.connection.select_all(sql)
     render :layout => false, :json => shelters.to_json
   end
+
+  private
+    def hazard_type
+      hazard = 'earthquake_hazard'
+      case params[:type].to_i
+      when 2
+        hazard = 'tsunami_hazard'
+      when 3
+        hazard = 'wind_and_flood_damage'
+      when 4
+        hazard = 'volcanic_hazard'
+      end
+      hazard
+    end
 end
