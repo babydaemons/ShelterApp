@@ -9,8 +9,7 @@ class SheltersController < ApplicationController
     lat1 = lat - 5 * DEG_PER_KM
     lat2 = lat + 5 * DEG_PER_KM
     lng = params[:lng].to_f
-    rad_lng = lng / 90 * Math::PI
-    deg_per_km = DEG_PER_KM #/ Math::cos(rad_lng)
+    deg_per_km = DEG_PER_KM / Math::cos(to_rad(lat))
     lng1 = lng - 5 * deg_per_km
     lng2 = lng + 5 * deg_per_km
     sql = ActiveRecord::Base.send(:sanitize_sql_array,
@@ -32,5 +31,13 @@ class SheltersController < ApplicationController
         hazard = 'volcanic_hazard'
       end
       hazard
+    end
+
+    def to_rad(deg)
+      deg / 180.0 * Math::PI
+    end
+
+    def to_deg(rad)
+      rad / Math::PI * 180.0
     end
 end
