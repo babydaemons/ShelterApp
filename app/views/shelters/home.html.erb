@@ -14,6 +14,22 @@ var icon = {
   url: "<%= asset_path('position.png') %>",
   scaledSize: new google.maps.Size(16, 16)
 };
+var shelter1_icon = {
+  url: "<%= asset_path('shelter1.png') %>",
+  size: new google.maps.Size(44, 80),
+  origin: new google.maps.Point(0, 0),
+  anchor: new google.maps.Point(22, 40),
+  scaledSize: new google.maps.Size(22, 40)
+};
+var shelter2_icon = {
+  url: "<%= asset_path('shelter2.png') %>",
+  size: new google.maps.Size(44, 80),
+  origin: new google.maps.Point(0, 0),
+  anchor: new google.maps.Point(22, 40),
+  scaledSize: new google.maps.Size(22, 40)
+};
+var shelter_icons = [ null, shelter1_icon, shelter2_icon ];
+var hazard_types = null;
 $(function() {
   function initLocation() {
     function successCallback(pos) {
@@ -70,6 +86,9 @@ $(function() {
 function hazardSelected(event) {
   $(".button").unbind('click').css('display', 'none');
   var type = event.target.id.replace('hazard', '');
+  hazard_type = (type == '1') ? 'earthquake_hazard' :
+                (type == '2') ? 'tsunami_hazard' :
+                (type == '3') ? 'wind_and_flood_damage' : 'volcanic_hazard';
   var position = map.getCenter();
   var lat = position.lat();
   var lng = position.lng();
@@ -92,6 +111,7 @@ function drawShelters(rsp) {
   for (var i = 0; i < length; ++i) {
     marker[i] = new google.maps.Marker({
       map: map,
+      icon: shelter_icons[json[i][hazard_type]],
       position: new google.maps.LatLng(json[i].lat, json[i].lng)
     });
     google.maps.event.addListener(marker[i], 'click', shelterSelected(i));
