@@ -42,7 +42,7 @@ $(function() {
     }
     function errorCallback(error) {
       var msgs = [ "UNKNOWN", "位置情報の利用が許可されていません", "デバイスの位置が判定できません", "タイムアウトしました" ];
-      alert(msgs[error.code]);
+      alert(msgs[error.code] + "\n" + error.message);
     }
     if (navigator.geolocation) {
       var options = {
